@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MiscUtil.IO;
 
-namespace CSpoof
+namespace ChromecastSpoof
 {
     public partial class frmCSpoof : Form
     {
@@ -20,7 +20,7 @@ namespace CSpoof
         private string[] prefixes = { "_233637DE", "_096084372", "_5FD0CDC9", "_70CF0F1E", "" };
         // From https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
         private string ipPattern = @"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-        private Properties.Settings settings = CSpoof.Properties.Settings.Default;
+        private Properties.Settings settings = ChromecastSpoof.Properties.Settings.Default;
 
         public frmCSpoof()
         {
@@ -92,11 +92,11 @@ namespace CSpoof
             return Regex.IsMatch(ip, ipPattern);
         }
 
-        private void spoofAllPrefixes(string ccname, string ip)
+        private void spoofAllPrefixes(string ccName, string ip)
         {
             for (int i = 0; i < prefixes.Length; i++)
             {
-                spoof(ccname, ip, prefixes[i]);
+                spoof(ccName, ip, prefixes[i]);
             }
         }
 

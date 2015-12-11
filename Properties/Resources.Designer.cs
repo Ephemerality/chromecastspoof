@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CSpoof.Properties {
+namespace ChromecastSpoof.Properties {
     using System;
     
     

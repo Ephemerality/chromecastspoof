@@ -1,4 +1,4 @@
-﻿namespace CSpoof
+﻿namespace ChromecastSpoof
 {
     partial class frmCSpoof
     {
