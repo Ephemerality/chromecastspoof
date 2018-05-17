@@ -32,10 +32,11 @@ namespace ChromecastSpoof
     public partial class frmCSpoof : Form
     {
         // List of service prefixes
-        private string[] prefixes = { "_233637DE", "_096084372", "_5FD0CDC9", "_70CF0F1E", "" };
+        private string[] prefixes = { "_233637DE", "_096084372", "_5FD0CDC9", "_70CF0F1E", "_CC1AD845", "_9AC194DC", "" };
         // From https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
         private string ipPattern = @"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
         private Properties.Settings settings = ChromecastSpoof.Properties.Settings.Default;
+        static Random random = new Random();
 
         public frmCSpoof()
         {
@@ -100,6 +101,7 @@ namespace ChromecastSpoof
             }
             else
                 spoofAllPrefixes(txtName.Text, txtIP.Text);
+                //spoof(txtName.Text, txtIP.Text);
         }
 
         private bool checkIP(string ip)
@@ -117,6 +119,16 @@ namespace ChromecastSpoof
 
         private void spoof(string ccName, string ip, string prefix = "")
         {
+            // Generate a random id based on the name
+            MD5 md5 = MD5.Create();
+            byte[] hashBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(ccName));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+                sb.Append(hashBytes[i].ToString("x2"));
+            string hash1 = sb.ToString();
+            string hostname = "Chromecast-Ultra-" + hash1;
+            string hostnamesplit = Regex.Replace(hash1, "^(.{8})(.{4})(.{4})(.{4})(.{12})$", "$1-$2-$3-$4-$5");
+
             UdpClient client = new UdpClient();
             IPAddress mcaddr = IPAddress.Parse("224.0.0.251");
             client.JoinMulticastGroup(mcaddr);
@@ -125,45 +137,42 @@ namespace ChromecastSpoof
             EndianBinaryWriter write = new EndianBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Big, stream);
             write.Write((ushort)0);
             write.Write((ushort)0x8400); //flags
-            write.Write((ushort)0);
-            write.Write((ushort)1); //answers
-            write.Write((ushort)0);
-            write.Write((ushort)3); //additional answers
+            write.Write((ushort)0); //questions
+            write.Write((ushort)1); //answer RRs
+            write.Write((ushort)0); //authority RRs
+            write.Write((ushort)3); //additional answer RRs
+            // Write answer record
             if (prefix != "")
                 writeOctets(new string[] { prefix, "_sub", "_googlecast", "_tcp", "local" }, write);
             else
                 writeOctets(new string[] { "_googlecast", "_tcp", "local" }, write);
-            write.Write((ushort) 12); //type
+            write.Write((ushort)12); //type (PTR, domain name PoinTeR)
             write.Write((ushort)1); //class
             write.Write((uint)120); //ttl
-            writeOctets(new string[] { ccName, "_googlecast", "_tcp", "local" }, write, true);
+            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write, true);
+
+            // Additional records
             // Write TXT record
-            writeOctets(new string[] { ccName, "_googlecast", "_tcp", "local" }, write);
+            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write);
             write.Write((ushort)16); //type (TXT)
             write.Write((ushort)0x8001); //class
             write.Write((uint)4500); //ttl
-            // Generate a random id based on the name
-            MD5 md5 = MD5.Create();
-            byte[] hashBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(ccName));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hashBytes.Length; i++)
-            {
-                sb.Append(hashBytes[i].ToString("x2"));
-            }
-            string hash1 = sb.ToString();
-            //string hash2 = String.Format("{0:X}", ccName.GetHashCode());
             string[] txtRecs = { "id=" + hash1,
-                "ve=04",
-                "md=Chromecast",
+                "cd=",
+                "rm=",
+                "ve=05",
+                "md=Chromecast Ultra",
                 "ic=/setup/icon.png",
                 "fn=" + ccName,
-                "ca=5",
+                "ca=4101",
                 "st=0",
                 "bs=",
+                "nf=1",
                 "rs="};
             writeTXT(txtRecs, write);
+
             // Write SRV record
-            writeOctets(new string[] { ccName, "_googlecast", "_tcp", "local" }, write);
+            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write);
             write.Write((ushort)33); //type (SRV)
             write.Write((ushort)0x8001); //class
             write.Write((uint)120); //ttl
@@ -172,12 +181,13 @@ namespace ChromecastSpoof
             tempwrite.Write((ushort)0); //priority
             tempwrite.Write((ushort)0); //weight
             tempwrite.Write((ushort)8009); //port
-            writeOctets(new string[] { ccName, "local" }, tempwrite);
+            writeOctets(new string[] { hostnamesplit, "local" }, tempwrite);
             byte[] buffer = tempstr.ToArray();
             write.Write((ushort)buffer.Length);
             write.Write(buffer);
+
             // Write A record
-            writeOctets(new string[] { ccName, "local" }, write);
+            writeOctets(new string[] { hostnamesplit, "local" }, write);
             write.Write((ushort)1); //type (A)
             write.Write((ushort)0x8001); //class
             write.Write((uint)120); //ttl
@@ -216,6 +226,11 @@ namespace ChromecastSpoof
             byte[] buffer = tempstr.ToArray();
             write.Write((ushort)buffer.Length);
             write.Write(buffer);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            spoof(txtName.Text, txtIP.Text);
         }
     }
 }

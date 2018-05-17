@@ -36,6 +36,7 @@
             this.txtIP = new System.Windows.Forms.TextBox();
             this.sendContinuous = new System.Windows.Forms.Button();
             this.tmrSend = new System.Windows.Forms.Timer(this.components);
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // sendOnce
@@ -96,12 +97,23 @@
             this.tmrSend.Interval = 2500;
             this.tmrSend.Tick += new System.EventHandler(this.tmrSend_Tick);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(56, 89);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(86, 23);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "SendNoPrefix";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // frmCSpoof
             // 
             this.AcceptButton = this.sendOnce;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(194, 87);
+            this.ClientSize = new System.Drawing.Size(194, 117);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.sendContinuous);
             this.Controls.Add(this.txtIP);
             this.Controls.Add(this.label2);
@@ -130,6 +142,7 @@
         private System.Windows.Forms.TextBox txtIP;
         private System.Windows.Forms.Button sendContinuous;
         private System.Windows.Forms.Timer tmrSend;
+        private System.Windows.Forms.Button button1;
     }
 }
 
