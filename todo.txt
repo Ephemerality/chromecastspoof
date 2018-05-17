@@ -1,0 +1,3 @@
+- Load prefixes & names from online/file and present as options
+- Selectable Chromecast type (regular, ultra, audio)
+- Custom port for target
