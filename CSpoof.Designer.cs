@@ -36,12 +36,17 @@
             this.txtIP = new System.Windows.Forms.TextBox();
             this.sendContinuous = new System.Windows.Forms.Button();
             this.tmrSend = new System.Windows.Forms.Timer(this.components);
-            this.button1 = new System.Windows.Forms.Button();
+            this.dgvChromecasts = new System.Windows.Forms.DataGridView();
+            this.chkUltra = new System.Windows.Forms.CheckBox();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnRemove = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvChromecasts)).BeginInit();
             this.SuspendLayout();
             // 
             // sendOnce
             // 
-            this.sendOnce.Location = new System.Drawing.Point(12, 60);
+            this.sendOnce.Location = new System.Drawing.Point(29, 94);
             this.sendOnce.Name = "sendOnce";
             this.sendOnce.Size = new System.Drawing.Size(75, 23);
             this.sendOnce.TabIndex = 2;
@@ -84,7 +89,7 @@
             // 
             // sendContinuous
             // 
-            this.sendContinuous.Location = new System.Drawing.Point(107, 60);
+            this.sendContinuous.Location = new System.Drawing.Point(124, 94);
             this.sendContinuous.Name = "sendContinuous";
             this.sendContinuous.Size = new System.Drawing.Size(75, 23);
             this.sendContinuous.TabIndex = 3;
@@ -97,23 +102,75 @@
             this.tmrSend.Interval = 2500;
             this.tmrSend.Tick += new System.EventHandler(this.tmrSend_Tick);
             // 
-            // button1
+            // dgvChromecasts
             // 
-            this.button1.Location = new System.Drawing.Point(56, 89);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(86, 23);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "SendNoPrefix";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.dgvChromecasts.AllowDrop = true;
+            this.dgvChromecasts.AllowUserToOrderColumns = true;
+            this.dgvChromecasts.AllowUserToResizeColumns = false;
+            this.dgvChromecasts.AllowUserToResizeRows = false;
+            this.dgvChromecasts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvChromecasts.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            this.dgvChromecasts.Location = new System.Drawing.Point(217, 6);
+            this.dgvChromecasts.Name = "dgvChromecasts";
+            this.dgvChromecasts.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvChromecasts.Size = new System.Drawing.Size(346, 256);
+            this.dgvChromecasts.TabIndex = 5;
+            this.dgvChromecasts.DragDrop += new System.Windows.Forms.DragEventHandler(this.dgvChromecasts_DragDrop);
+            this.dgvChromecasts.DragOver += new System.Windows.Forms.DragEventHandler(this.dgvChromecasts_DragOver);
+            this.dgvChromecasts.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvChromecasts_MouseDown);
+            this.dgvChromecasts.MouseMove += new System.Windows.Forms.MouseEventHandler(this.dgvChromecasts_MouseMove);
+            // 
+            // chkUltra
+            // 
+            this.chkUltra.AutoSize = true;
+            this.chkUltra.Location = new System.Drawing.Point(56, 60);
+            this.chkUltra.Name = "chkUltra";
+            this.chkUltra.Size = new System.Drawing.Size(48, 17);
+            this.chkUltra.TabIndex = 6;
+            this.chkUltra.Text = "Ultra";
+            this.chkUltra.UseVisualStyleBackColor = true;
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(189, 6);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(22, 22);
+            this.btnAdd.TabIndex = 7;
+            this.btnAdd.Text = "+";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // btnRemove
+            // 
+            this.btnRemove.Location = new System.Drawing.Point(189, 34);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(22, 22);
+            this.btnRemove.TabIndex = 8;
+            this.btnRemove.Text = "-";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            // 
+            // btnClear
+            // 
+            this.btnClear.Location = new System.Drawing.Point(189, 62);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(22, 22);
+            this.btnClear.TabIndex = 9;
+            this.btnClear.Text = "C";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // frmCSpoof
             // 
             this.AcceptButton = this.sendOnce;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(194, 117);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(575, 270);
+            this.Controls.Add(this.btnClear);
+            this.Controls.Add(this.btnRemove);
+            this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.chkUltra);
+            this.Controls.Add(this.dgvChromecasts);
             this.Controls.Add(this.sendContinuous);
             this.Controls.Add(this.txtIP);
             this.Controls.Add(this.label2);
@@ -128,6 +185,7 @@
             this.Text = "CSpoof";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmCSpoof_FormClosing);
             this.Load += new System.EventHandler(this.frmCSpoof_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvChromecasts)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -142,7 +200,11 @@
         private System.Windows.Forms.TextBox txtIP;
         private System.Windows.Forms.Button sendContinuous;
         private System.Windows.Forms.Timer tmrSend;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.DataGridView dgvChromecasts;
+        private System.Windows.Forms.CheckBox chkUltra;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.Button btnClear;
     }
 }
 
