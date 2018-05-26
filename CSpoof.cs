@@ -21,11 +21,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using MiscUtil.IO;
 
 namespace ChromecastSpoof
 {
@@ -119,113 +117,15 @@ namespace ChromecastSpoof
 
         private void spoof(string ccName, string ip, string prefix = "")
         {
-            // Generate a random id based on the name
-            MD5 md5 = MD5.Create();
-            byte[] hashBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(ccName));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hashBytes.Length; i++)
-                sb.Append(hashBytes[i].ToString("x2"));
-            string hash1 = sb.ToString();
-            string hostname = "Chromecast-Ultra-" + hash1;
-            string hostnamesplit = Regex.Replace(hash1, "^(.{8})(.{4})(.{4})(.{4})(.{12})$", "$1-$2-$3-$4-$5");
-
             UdpClient client = new UdpClient();
             IPAddress mcaddr = IPAddress.Parse("224.0.0.251");
             client.JoinMulticastGroup(mcaddr);
             IPEndPoint remoteep = new IPEndPoint(mcaddr, 5353);
-            MemoryStream stream = new MemoryStream();
-            EndianBinaryWriter write = new EndianBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Big, stream);
-            write.Write((ushort)0);
-            write.Write((ushort)0x8400); //flags
-            write.Write((ushort)0); //questions
-            write.Write((ushort)1); //answer RRs
-            write.Write((ushort)0); //authority RRs
-            write.Write((ushort)3); //additional answer RRs
-            // Write answer record
-            if (prefix != "")
-                writeOctets(new string[] { prefix, "_sub", "_googlecast", "_tcp", "local" }, write);
-            else
-                writeOctets(new string[] { "_googlecast", "_tcp", "local" }, write);
-            write.Write((ushort)12); //type (PTR, domain name PoinTeR)
-            write.Write((ushort)1); //class
-            write.Write((uint)120); //ttl
-            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write, true);
-
-            // Additional records
-            // Write TXT record
-            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write);
-            write.Write((ushort)16); //type (TXT)
-            write.Write((ushort)0x8001); //class
-            write.Write((uint)4500); //ttl
-            string[] txtRecs = { "id=" + hash1,
-                "cd=",
-                "rm=",
-                "ve=05",
-                "md=Chromecast Ultra",
-                "ic=/setup/icon.png",
-                "fn=" + ccName,
-                "ca=4101",
-                "st=0",
-                "bs=",
-                "nf=1",
-                "rs="};
-            writeTXT(txtRecs, write);
-
-            // Write SRV record
-            writeOctets(new string[] { hostname, "_googlecast", "_tcp", "local" }, write);
-            write.Write((ushort)33); //type (SRV)
-            write.Write((ushort)0x8001); //class
-            write.Write((uint)120); //ttl
-            MemoryStream tempstr = new MemoryStream();
-            EndianBinaryWriter tempwrite = new EndianBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Big, tempstr);
-            tempwrite.Write((ushort)0); //priority
-            tempwrite.Write((ushort)0); //weight
-            tempwrite.Write((ushort)8009); //port
-            writeOctets(new string[] { hostnamesplit, "local" }, tempwrite);
-            byte[] buffer = tempstr.ToArray();
-            write.Write((ushort)buffer.Length);
-            write.Write(buffer);
-
-            // Write A record
-            writeOctets(new string[] { hostnamesplit, "local" }, write);
-            write.Write((ushort)1); //type (A)
-            write.Write((ushort)0x8001); //class
-            write.Write((uint)120); //ttl
-            write.Write((ushort)4); //length
-            write.Write(ip.Split('.').Select<string, byte>(i => byte.Parse(i)).ToArray());
-            buffer = stream.ToArray();
+            
             string test = BitConverter.ToString(buffer);
             test = test.Replace("-", "");
             client.Send(buffer, buffer.Length, remoteep);
             client.Close();
-        }
-
-        private void writeOctets(string[] octets, EndianBinaryWriter write, bool writeLen = false)
-        {
-            if (writeLen)
-            {
-                int count = octets.Select(i => i.Length).Sum() + octets.Length + 1;
-                write.Write((ushort)count);
-            }
-            for (int i = 0; i < octets.Length; i++)
-            {
-                write.Write((byte)octets[i].Length);
-                write.Write(Encoding.ASCII.GetBytes(octets[i]));
-            }
-            write.Write((byte)0);
-        }
-
-        private void writeTXT(string[] text, EndianBinaryWriter write)
-        {
-            MemoryStream tempstr = new MemoryStream();
-            EndianBinaryWriter tempwrite = new EndianBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Big, tempstr);
-            for (int i = 0; i < text.Length; i++)
-            {
-                tempwrite.Write(text[i]);
-            }
-            byte[] buffer = tempstr.ToArray();
-            write.Write((ushort)buffer.Length);
-            write.Write(buffer);
         }
 
         private void button1_Click(object sender, EventArgs e)
