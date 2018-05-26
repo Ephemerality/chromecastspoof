@@ -11,20 +11,24 @@ namespace ChromecastSpoof
 {
     class Chromecast
     {
-        private string _name;
-        private string _ip;
         private bool _ultra;
         private string _hostname;
         private string _hash;
 
         public Chromecast(string name, string ip, bool ultra)
         {
-            _name = name;
+            Name = name;
             _hash = MD5Hash();
-            _ip = ip;
+            IP = ip;
             _ultra = ultra;
             _hostname = "Chromecast-" + (ultra ? "Ultra-" : "") + _hash;
         }
+
+        public string Name { get; }
+
+        public string Ultra { get { return _ultra ? "Yes" : "No"; } }
+
+        public string IP { get; }
 
         private string SplitHostname
         {
@@ -38,7 +42,7 @@ namespace ChromecastSpoof
         {
             using (MD5 md5 = MD5.Create())
             {
-                byte[] hash = md5.ComputeHash(Encoding.ASCII.GetBytes(_name));
+                byte[] hash = md5.ComputeHash(Encoding.ASCII.GetBytes(Name));
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hash.Length; i++)
                     sb.Append(hash[i].ToString("x2"));
@@ -78,7 +82,7 @@ namespace ChromecastSpoof
                 "ve=05",
                 "md=Chromecast Ultra",
                 "ic=/setup/icon.png",
-                "fn=" + _name,
+                "fn=" + Name,
                 "ca=4101",
                 "st=0",
                 "bs=",
@@ -107,7 +111,7 @@ namespace ChromecastSpoof
             write.Write((ushort)0x8001); //class
             write.Write((uint)120); //ttl
             write.Write((ushort)4); //length
-            write.Write(_ip.Split('.').Select<string, byte>(i => byte.Parse(i)).ToArray());
+            write.Write(IP.Split('.').Select<string, byte>(i => byte.Parse(i)).ToArray());
             return stream.ToArray();
         }
 
